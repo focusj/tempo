@@ -38,4 +38,4 @@ crossdock/crossdock-*
 run-crossdock.log
 proto-gen/.patched-otel-proto/
 __pycache__
-
+examples/hotrod/tempo-data

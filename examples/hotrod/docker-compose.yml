@@ -1,26 +1,50 @@
 version: '3.7'
 services:
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    ports:
-      - "6831:6831/udp"
-      - "16686:16686"
-    networks:
-      - jaeger-example
   hotrod:
     image: jaegertracing/example-hotrod:latest
     ports: 
       - "8080:8080"
     command: ["all"]
     environment:
-      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_HOST=tempo
       # Note: if your application is using Node.js Jaeger Client, you need port 6832,
       #       unless issue https://github.com/jaegertracing/jaeger/issues/1596 is resolved.
       - JAEGER_AGENT_PORT=6831
     networks:
       - jaeger-example
     depends_on:
-      - jaeger
+      - tempo
 
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo-local.yaml:/etc/tempo.yaml
+      - ./tempo-data:/tmp/tempo
+    networks:
+      - jaeger-example
+
+  prometheus:
+    image: prom/prometheus:latest
+    command: [ "--config.file=/etc/prometheus.yaml" ]
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+    networks:
+      - jaeger-example
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3000:3000"
+    networks:
+      - jaeger-example
 networks:
   jaeger-example:
