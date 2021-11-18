@@ -81,10 +81,18 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&jaegerUI, "jaeger-ui", "j", "http://localhost:16686", "Address of Jaeger UI to create [find trace] links")
 
 	rand.Seed(int64(time.Now().Nanosecond()))
-	logger, _ = zap.NewDevelopment(
-		zap.AddStacktrace(zapcore.FatalLevel),
-		zap.AddCallerSkip(1),
-	)
+	// logger, _ = zap.NewDevelopment(
+	// 	zap.AddStacktrace(zapcore.FatalLevel),
+	// 	zap.AddCallerSkip(1),
+	// )
+	logger, _ = zap.Config{
+		Encoding:    "json",
+		Level:       zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		OutputPaths: []string{"stdout"},
+		EncoderConfig: zapcore.EncoderConfig{
+			MessageKey: "message",
+		},
+	}.Build()
 	cobra.OnInitialize(onInitialize)
 }
 

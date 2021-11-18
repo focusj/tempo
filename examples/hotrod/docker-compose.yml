@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   hotrod:
-    image: jaegertracing/example-hotrod:latest
+    image: jaegertracing/example-hotrod:zap-json
     ports: 
       - "8080:8080"
     command: ["all"]
